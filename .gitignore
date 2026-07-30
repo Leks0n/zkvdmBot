@@ -4,9 +4,6 @@ ENV/
 .env
 
 __pycache__/
-*.py
-*$py.class
-*.so
 
 .vscode/
 .idea/
