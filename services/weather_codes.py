@@ -31,3 +31,17 @@ WEATHER_CODES = {
 
 def get_weather_description(code: int) -> str:
     return WEATHER_CODES.get(code, f'Неизвестно (код: {code})')
+
+def get_uv_description(uv_index: float | None) -> str:
+    if uv_index is None or uv_index < 0:
+        return f'{uv_index} - 🟢 Низкий (солнце не активно)'
+    elif uv_index <= 2:
+        return f'{uv_index} - Низкий — Защита не требуется'
+    elif uv_index <= 5:
+        return f'{uv_index} - 🟡 Умеренный — Нужны очки и крем при долгом пребывании'
+    elif uv_index <= 7:
+        return f'{uv_index} - 🟠 Высокий — Крем, очки, одежда и тень обязательны'
+    elif uv_index <= 10:
+        return f'{uv_index} - 🔴 Очень высокий — Максимальная защита'
+    else:
+        return f'{uv_index} - 🟣 Экстремальный — Избегайте пребывания на улице'

@@ -36,7 +36,8 @@ async def process_city_message(message: Message):
             f'🌍 <b>{weather_data['city']}</b>\n\n'
             f'Температура: {weather_data['temperature']}°C\n'
             f'Ветер: {weather_data['windspeed']} м/с\n'
-            f'{weather_data['description']}'
+            f'{weather_data['description']}\n'
+            f'УФ: {weather_data['uv_description']}'
         )
         await message.answer(response)
 
