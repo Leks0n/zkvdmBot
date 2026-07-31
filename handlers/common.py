@@ -21,9 +21,12 @@ async def process_command_help(message: Message):
         "Команды:\n"
         "/start - Начать работу\n"
         "/help - Показать справку"
+        "/add_city (город) - Добавить в избранное\n"
+        "/my_cities - Мои избранные города\n"
+        "/remove_city (город) - Удалить из избранного"
     )
 
-@common_router.message(F.text)
+@common_router.message(F.text & ~F.text.startswith('/'))
 async def process_city_message(message: Message):
     await message.answer(
         f'Ищу погоду в городе {message.text}'

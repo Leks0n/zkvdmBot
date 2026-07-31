@@ -1,11 +1,12 @@
 import asyncio
-import logging 
+import logging
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 
 from config import BOT_TOKEN
 from handlers.common import common_router
+from handlers.favourites import favourites_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -20,6 +21,7 @@ async def main():
 
     dp = Dispatcher()
 
+    dp.include_router(favourites_router)
     dp.include_router(common_router)
 
     print('Запуск бота')

@@ -1,0 +1,56 @@
+from aiogram import Router, F
+from aiogram.types import Message, CallbackQuery
+from aiogram.filters import Command
+
+from services.favourites import add_city, remove_city, get_user_city
+from services.keyboards import create_action_keyboard, create_cities_keyboard
+
+favourites_router = Router()
+
+@favourites_router.message(Command('add_city'))
+async def process_command_add_city(message: Message):
+    args = message.text.split(maxsplit=1)
+
+    if len(args) < 2:
+        await message.answer('❌ Использование: /add_city (название_города)\nПример: /add_city Москва')
+        return
+
+    city = args[1].split()
+    user_id = message.from_user.id
+
+    if add_city(user_id, city):
+        await message.answer(f'Город {city} добавлен в избранное')
+    else:
+        await message.answer(f'Город {city} уже находится в избранном')
+
+@favourites_router.message(Command('my_cities'))
+async def process_command_my_cities(message: Message):
+    user_id = message.from_user.id
+    cities = get_user_city(user_id)
+
+    if not cities:
+        await message.answer('У вас пока нет городов в списке избранных')
+        return
+
+    cities_list = '\n'.join([f'{city}' for city in cities])
+    text = f'Ваши избранные города:\n{cities_list}'
+
+    keyboard = create_cities_keyboard(cities)
+
+    await message.answer(text, reply_markup=keyboard)
+
+@favourites_router.message(Command('remove_city'))
+async def process_command_removeCity(message: Message):
+    args = message.text.split(maxsplit=1)
+
+    if len(args) < 2:
+        await message.answer('❌ Использование: /remove_city (название_города)\nПример: /remove_city Москва')
+        return
+
+    city = args[1].strip()
+    user_id = message.from_user.id
+
+    if remove_city(user_id, city):
+        await message.answer(f'Город: {city} успешно удален из списка избранных')
+    else:
+        await message.answer(f'Город: {city} не найден в вашем списке!')
