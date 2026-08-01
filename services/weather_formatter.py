@@ -13,7 +13,7 @@ async def send_weather_report(message: Message | CallbackQuery, city: str):
             f'Температура: {weather_data['temperature']}°C\n'
             f'Ветер: {weather_data['windspeed']} м/с\n'
             f'{weather_data['description']}\n'
-            f'УФ: {weather_data['uv_description']}'
+            #f'УФ: {weather_data['uv_description']}'
         )
 
     if isinstance(message, CallbackQuery):
