@@ -1,4 +1,4 @@
-import aiohttp 
+import aiohttp
 
 from services.weather_codes import get_weather_description, get_uv_description
 

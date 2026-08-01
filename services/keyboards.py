@@ -17,7 +17,7 @@ def create_cities_keyboard(cities: list) -> InlineKeyboardBuilder:
         if not city_name:
             continue
 
-        builder.button(text=city, callback_data=f'city_{city}')
+        builder.button(text=city, callback_data=f'city:{city_name}')
 
     builder.adjust(2)
 
@@ -28,8 +28,8 @@ def create_action_keyboard(city: str) -> InlineKeyboardMarkup:
 
     city_name = clean_city_name(city)
 
-    builder.button(text='Показать погоду', callback_data=f'weather_{city}')
-    builder.button(text='Удалить из избранного', callback_data=f'remove_{city}')
+    builder.button(text='Показать погоду', callback_data=f'weather:{city_name}')
+    builder.button(text='Удалить из избранного', callback_data=f'remove:{city_name}')
 
     builder.adjust(1)
 
