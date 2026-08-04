@@ -6,3 +6,4 @@ env.read_env()
 
 BOT_TOKEN = env.str('BOT_TOKEN')
 OWM_API_KEY = env.str('OWM_API_KEY')
+DATABASE_URL = env.str('DATABASE_URL')
