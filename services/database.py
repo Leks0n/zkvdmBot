@@ -8,9 +8,11 @@ async def init_pool():
     pool = await asyncpg.create_pool(dsn=DATABASE_URL, min_size=2, max_size=10)
 
 async def close_pool():
-    global pool 
+    global pool
     if pool:
         await pool.close()
+    pool = None
+    
 
 async def get_user_cities(user_id: int) -> list[str]:
     rows = await pool.fetch(
@@ -24,3 +26,50 @@ async def get_user_cities(user_id: int) -> list[str]:
         user_id
     )
     return [row['name'] for row in rows]
+
+async def add_city(user_id: int, city_name: str) -> bool:
+    await pool.execute(
+        """
+        INSERT INTO cities (name) VALUES ($1)
+        ON CONFLICT (name) DO NOTHING
+        """, 
+        city_name                                                                                                 
+    )
+
+    city_id = await pool.fetchval(
+        """
+        SELECT id FROM cities WHERE name=$1
+        """, 
+        city_name
+    )
+
+    status = await pool.execute(
+        """
+        INSERT INTO favorites (user_id, city_id) VALUES ($1, $2)
+        ON CONFLICT (user_id, city_id) DO NOTHING
+        """,
+        user_id,
+        city_id,
+    )
+
+    return int(status.split()[-1]) == 1 
+
+async def remove_city(user_id: int, city_name: str) -> bool: 
+    city_id = await pool.fetchval(
+        """
+        SELECT id FROM cities WHERE name = $1
+        """,
+        city_name
+    )
+    if city_id is None:
+        return False
+
+    status = await pool.execute(
+        """
+        DELETE FROM favorites WHERE user_id = $1 AND city_id = $2
+        """,
+        user_id,
+        city_id,
+    )
+    return int(status.split()[-1]) == 1
+
