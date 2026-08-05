@@ -12,7 +12,17 @@ async def close_pool():
     if pool:
         await pool.close()
     pool = None
-    
+
+async def ensure_user(user_id: int, user_name: str | None) -> None:
+    await pool.execute(
+        """
+        INSERT INTO users (user_id, username) VALUES ($1, $2)
+        ON CONFLICT (user_id) DO UPDATE SET username = EXCLUDED.username
+        """,
+        user_id,
+        user_name
+    )
+
 
 async def get_user_cities(user_id: int) -> list[str]:
     rows = await pool.fetch(
