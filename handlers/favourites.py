@@ -2,25 +2,26 @@ from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command
 
-from services.favourites import add_city, remove_city, get_user_city
+from services.database import add_city, remove_city, get_user_cities, ensure_user
 from services.keyboards import create_action_keyboard, create_cities_keyboard
-from services.weather_api import get_weather_by_city
 from services.weather_formatter import send_weather_report
+from services.utils import clean_city_name
 
 favourites_router = Router()
 
 @favourites_router.message(Command('add_city'))
 async def process_command_add_city(message: Message):
+    user_id = message.from_user.id
+    await ensure_user(user_id, message.from_user.username)
     args = message.text.split(maxsplit=1)
 
     if len(args) < 2:
         await message.answer('❌ Использование: /add_city (название_города)\nПример: /add_city Москва')
         return
 
-    city = args[1].split()
-    user_id = message.from_user.id
+    city = clean_city_name(args[1])
 
-    if add_city(user_id, city):
+    if await add_city(user_id, city):
         await message.answer(f'Город {city} добавлен в избранное')
     else:
         await message.answer(f'Город {city} уже находится в избранном')
@@ -28,7 +29,8 @@ async def process_command_add_city(message: Message):
 @favourites_router.message(Command('my_cities'))
 async def process_command_my_cities(message: Message):
     user_id = message.from_user.id
-    cities = get_user_city(user_id)
+    await ensure_user(user_id, message.from_user.username)
+    cities = await get_user_cities(user_id)
 
     if not cities:
         await message.answer('У вас пока нет городов в списке избранных')
@@ -42,17 +44,18 @@ async def process_command_my_cities(message: Message):
     await message.answer(text, reply_markup=keyboard)
 
 @favourites_router.message(Command('remove_city'))
-async def process_command_removeCity(message: Message):
+async def process_command_remove_city(message: Message):
     args = message.text.split(maxsplit=1)
+    user_id = message.from_user.id
+    await ensure_user(user_id, message.from_user.username)
 
     if len(args) < 2:
         await message.answer('❌ Использование: /remove_city (название_города)\nПример: /remove_city Москва')
         return
 
-    city = args[1].strip()
-    user_id = message.from_user.id
+    city = clean_city_name(args[1])
 
-    if remove_city(user_id, city):
+    if await remove_city(user_id, city):
         await message.answer(f'Город: {city} успешно удален из списка избранных')
     else:
         await message.answer(f'Город: {city} не найден в вашем списке!')
@@ -86,10 +89,11 @@ async def process_show_weather(callback: CallbackQuery):
 async def process_remove_city(callback: CallbackQuery):
     action, city = callback.data.split(':', 1)
     user_id = callback.from_user.id
+    await ensure_user(user_id, callback.from_user.username)
 
-    remove_city(user_id, city)
+    await remove_city(user_id, city)
 
-    cities = get_user_city(user_id)
+    cities = await get_user_cities(user_id)
 
     if cities:
         keyboard = create_cities_keyboard(cities)
@@ -98,13 +102,14 @@ async def process_remove_city(callback: CallbackQuery):
             reply_markup=keyboard
         )
     else:
-        await callback.messag.edit_text('Город удален.  Список избранного пуст')
+        await callback.message.edit_text('Город удален.  Список избранного пуст')
     await callback.answer(f'Город {city} удален')
 
 @favourites_router.callback_query(F.data == 'back_to_cities')
 async def process_back_to_cities(callback: CallbackQuery):
-    user_id = callback.from_user_id
-    cities = get_user_city(user_id)
+    user_id = callback.from_user.id
+    await ensure_user(user_id, callback.from_user.username)
+    cities = await get_user_cities(user_id)
 
     if cities:
         keyboard = create_cities_keyboard(cities)

@@ -7,6 +7,7 @@ from aiogram.enums import ParseMode
 from config import BOT_TOKEN
 from handlers.common import common_router
 from handlers.favourites import favourites_router
+from services.database import init_pool, close_pool
 
 logging.basicConfig(
     level=logging.INFO,
@@ -25,7 +26,12 @@ async def main():
     dp.include_router(common_router)
 
     print('Запуск бота')
-    await dp.start_polling(bot)
+    await init_pool()
+    try:
+        await dp.start_polling(bot)
+    finally:
+        await bot.session.close()
+        await close_pool()
 
 if __name__ == '__main__':
     try:

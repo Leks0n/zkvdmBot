@@ -6,11 +6,7 @@ from .utils import clean_city_name
 def create_cities_keyboard(cities: list) -> InlineKeyboardBuilder:
     builder = InlineKeyboardBuilder()
 
-    print(f'===ОТЛАДКА cities = {cities}')
-    print(f'===ОТЛАДКА cities = {type(cities)}')
-
     for city in cities:
-        print(f"=== ОТЛАДКА: city = {city}, тип = {type(city)}")
 
         city_name = clean_city_name(city)
 

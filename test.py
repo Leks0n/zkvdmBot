@@ -1,6 +1,5 @@
-from urllib.parse import urlparse
-from config import DATABASE_URL
+from services.utils import clean_city_name
 
-u = urlparse(DATABASE_URL)
+city = str(input())
 
-print(u)
+print(clean_city_name(city))
